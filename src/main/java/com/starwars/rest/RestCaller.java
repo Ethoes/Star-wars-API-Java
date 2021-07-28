@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static com.starwars.rest.MergeSort.mergeSort;
 
@@ -39,6 +40,9 @@ public class RestCaller {
      * @return a string of names of all characters the given character has appeared with.
      */
     protected String getOtherCharacters(String name) {
+        //Change query to all lower case.
+        name = name.toLowerCase();
+
         //First check if this query has been run before
         JSONObject prevQuery = getJSONObject(this.queries, name, "query");
         //If it has return that found result
