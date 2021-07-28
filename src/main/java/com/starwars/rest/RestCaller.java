@@ -10,14 +10,21 @@ public class RestCaller {
 
     private JSONArray characters;
     private JSONArray movies;
+    private JSONArray queries;
 
     public RestCaller() {
         //TODO grab characterURL and Query from file
         this.characters = new JSONArray();
         this.movies = new JSONArray();
+        this.queries = new JSONArray();
     }
 
     protected String getNames(String name) {
+        JSONObject prevQuery = getJSONObject(this.queries, name, "query");
+        if(prevQuery != null) {
+            return prevQuery.get("result").toString();
+        }
+
         //Grab result via get request
         String result = RequestNames(name);
 
@@ -32,7 +39,12 @@ public class RestCaller {
         }
 
         JSONArray person = jason.getJSONArray("results");
-        this.getAllActors((JSONObject) person.get(0));
+        JSONArray people = this.getAllActors((JSONObject) person.get(0));
+
+        JSONObject query = new JSONObject();
+        query.put("query", name);
+        query.put("result", people);
+        queries.put(query);
 
         return name;
     }
@@ -51,7 +63,7 @@ public class RestCaller {
         return result;
     }
 
-    private String getAllActors(JSONObject person) {
+    private JSONArray getAllActors(JSONObject person) {
         ArrayList<String> peopleURL = new ArrayList<>();
         JSONArray people = new JSONArray();
         JSONArray films =  (JSONArray) person.get("films");
@@ -78,8 +90,9 @@ public class RestCaller {
             }
         }
 
+        //TODO remove this line
         System.out.println(people.toString());
-        return "pp";
+        return people;
     }
 
     private JSONObject getJSONObject(JSONArray array,String compare, String field) {
