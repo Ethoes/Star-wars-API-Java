@@ -170,7 +170,7 @@ public class RestCaller {
      * @param field is the JSON field in which values need to be compared.
      * @return a JSON Object if a value is found, if it is not return null.
      */
-    protected JSONObject getJSONObject(JSONArray array,String compare, String field) {
+    private static JSONObject getJSONObject(JSONArray array,String compare, String field) {
         //Loop through a given array.
         for(Object object: array) {
             //If the value matches in the given field, return that JSON object.
