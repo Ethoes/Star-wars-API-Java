@@ -1,10 +1,17 @@
 package com.starwars.rest;
 
+import org.apache.tomcat.util.json.JSONParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+
+import static com.starwars.rest.MergeSort.mergeSort;
 
 public class RestCaller {
 
@@ -13,16 +20,19 @@ public class RestCaller {
     private JSONArray queries;
 
     public RestCaller() {
-        //TODO grab characterURL and Query from file
-        this.characters = new JSONArray();
-        this.movies = new JSONArray();
-        this.queries = new JSONArray();
+        try {
+            this.characters = new JSONArray(Files.readString(Path.of("characters.json")));
+            this.queries = new JSONArray(Files.readString(Path.of("queries.json")));
+            this.movies = new JSONArray(Files.readString(Path.of("movies.json")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     protected String getNames(String name) {
         JSONObject prevQuery = getJSONObject(this.queries, name, "query");
         if(prevQuery != null) {
-            return prevQuery.get("result").toString();
+            return readableNames(prevQuery.getJSONArray("result"));
         }
 
         //Grab result via get request
@@ -31,22 +41,28 @@ public class RestCaller {
         //Turn response into JSON object
         JSONObject jason = new JSONObject(result);
 
+        JSONObject query = new JSONObject();
+        query.put("query", name);
+
         //Check for invalid results
         if(jason.getInt("count") > 1) {
+            query.put("result", "Multiple results found, please specify.");
+            queries.put(query);
             return "Multiple results found, please specify.";
         } else if(jason.getInt("count") <= 0) {
+            query.put("result", "No matches found, please check if the name was written correctly.");
+            queries.put(query);
             return "No matches found, please check if the name was written correctly.";
         }
 
         JSONArray person = jason.getJSONArray("results");
         JSONArray people = this.getAllActors((JSONObject) person.get(0));
+        people = mergeSort(people);
 
-        JSONObject query = new JSONObject();
-        query.put("query", name);
         query.put("result", people);
         queries.put(query);
 
-        return name;
+        return readableNames(people);
     }
 
     private static String RequestNames(String request) {
@@ -112,6 +128,33 @@ public class RestCaller {
             if(!characters.contains((String) movieCharacter)) {
                 characters.add((String) movieCharacter);
             }
+        }
+    }
+
+    private static String readableNames(JSONArray people) {
+        ArrayList<String> names = new ArrayList<String>();
+        for(Object person: people) {
+            JSONObject character = (JSONObject) person;
+            names.add(character.getString("name"));
+        }
+        return names.toString();
+    }
+
+    protected void saveJSONFiles() {
+        try {
+            FileWriter file = new FileWriter("queries.json");
+            file.write(this.queries.toString());
+            file.flush();
+
+            file = new FileWriter("movies.json");
+            file.write(this.movies.toString());
+            file.flush();
+
+            file = new FileWriter("characters.json");
+            file.write(this.characters.toString());
+            file.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

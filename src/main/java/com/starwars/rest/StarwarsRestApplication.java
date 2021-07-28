@@ -1,12 +1,8 @@
 package com.starwars.rest;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import java.util.Scanner;
 
-import static org.json.JSONObject.getNames;
 
-@SpringBootApplication
 public class StarwarsRestApplication {
 
 	public static void main(String[] args) {
@@ -21,7 +17,7 @@ public class StarwarsRestApplication {
 			System.out.println(rc.getNames(str));
 		}
 
-
+		rc.saveJSONFiles();
 		sc.close();
 	}
 }
