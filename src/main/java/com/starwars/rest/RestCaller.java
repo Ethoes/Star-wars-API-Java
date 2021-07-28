@@ -43,7 +43,12 @@ public class RestCaller {
         JSONObject prevQuery = getJSONObject(this.queries, name, "query");
         //If it has return that found result
         if(prevQuery != null) {
-            return readableNames(prevQuery.getJSONArray("result"));
+            //Check if it is an actual result or error message.
+            if(prevQuery.get("result") instanceof JSONArray) {
+                return readableNames(prevQuery.getJSONArray("result"));
+            } else {
+                return prevQuery.get("result").toString();
+            }
         }
 
         //Call the API using a query given by the user.
@@ -86,7 +91,7 @@ public class RestCaller {
      * @param request is the user created query.
      * @return the string form of the JSON returned by the API
      */
-    private static String RequestNames(String request) {
+    protected static String RequestNames(String request) {
         //Create rest template and empty string for get request
         RestTemplate rt = new RestTemplate();
         String result = "";
@@ -165,7 +170,7 @@ public class RestCaller {
      * @param field is the JSON field in which values need to be compared.
      * @return a JSON Object if a value is found, if it is not return null.
      */
-    private JSONObject getJSONObject(JSONArray array,String compare, String field) {
+    protected JSONObject getJSONObject(JSONArray array,String compare, String field) {
         //Loop through a given array.
         for(Object object: array) {
             //If the value matches in the given field, return that JSON object.
@@ -202,7 +207,7 @@ public class RestCaller {
      * @param people is the array of people found using the API.
      * @return a list of people in the form of a string.
      */
-    private static String readableNames(JSONArray people) {
+    protected static String readableNames(JSONArray people) {
         ArrayList<String> names = new ArrayList<String>();
         for(Object person: people) {
             JSONObject character = (JSONObject) person;
