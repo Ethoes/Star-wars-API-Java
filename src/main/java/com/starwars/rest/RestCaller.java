@@ -101,11 +101,14 @@ public class RestCaller {
     }
 
     /**
-     * This method cycles through all films a character has been in and then saves finds all other characters in those movies.
+     * This method cycles through all films a character has been in and then saves all other characters in those movies.
      * @param person is the given person asked of by the user.
      * @return a JSON array of all other characters the given character shares a movie with.
      */
     private JSONArray getAllActors(JSONObject person) {
+        //Save this URL to be excluded from the list
+        String thisURL = person.getString("url");
+
         //This array is used to save all the URL's given in the movie objects
         ArrayList<String> peopleURL = new ArrayList<>();
 
@@ -137,16 +140,19 @@ public class RestCaller {
 
         //Then loop through all people found
         for(String personURL: peopleURL) {
-            //Check if a character is already stored
-            JSONObject character = getJSONObject(this.characters, personURL, "url");
-            if(character == null) {
-                //If it was not send an API call and save the character data
-                String personObject = rt.getForObject(personURL, String.class);
-                people.put(new JSONObject(personObject));
-                this.characters.put(new JSONObject(personObject));
-            } else {
-                //Save the character data
-                people.put(character);
+            //Only check to add character if it is not the requested character itself.
+            if (!personURL.equals(thisURL)) {
+                //Check if a character is already stored
+                JSONObject character = getJSONObject(this.characters, personURL, "url");
+                if (character == null) {
+                    //If it was not send an API call and save the character data
+                    String personObject = rt.getForObject(personURL, String.class);
+                    people.put(new JSONObject(personObject));
+                    this.characters.put(new JSONObject(personObject));
+                } else {
+                    //Save the character data
+                    people.put(character);
+                }
             }
         }
         return people;
