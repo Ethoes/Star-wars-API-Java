@@ -31,13 +31,17 @@ public class MergeSortTest {
 
             test = mergeSort(test);
 
+            System.out.println(test.toString());
+
             //create comparing array (200BBY, 12BBY, 120BBY)
             JSONArray compare = new JSONArray();
             compare.put(personOne);
             compare.put(personTwo);
             compare.put(personThree);
 
-            assertTrue(test.equals(compare));
+            System.out.println(compare.toString());
+
+            assertTrue(test.toString().equals(compare.toString()));
         } catch(org.json.JSONException e) {
             assert false;
         }
@@ -52,7 +56,7 @@ public class MergeSortTest {
 
         empty = mergeSort(empty);
 
-        assertTrue(empty.equals(new JSONArray()));
+        assertTrue(empty.toString().equals(new JSONArray().toString()));
     }
 
     /**
