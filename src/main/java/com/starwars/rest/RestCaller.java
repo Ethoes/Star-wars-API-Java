@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import static com.starwars.rest.MergeSort.mergeSort;
 
@@ -17,21 +16,40 @@ import static com.starwars.rest.MergeSort.mergeSort;
  */
 public class RestCaller {
 
-    private JSONArray characters;
-    private JSONArray movies;
-    private JSONArray queries;
+    public JSONArray characters;
+    public JSONArray movies;
+    public JSONArray queries;
+    public RestTemplate rt;
 
     /**
      * The constructor is used for reading in the json files.
      */
-    public RestCaller() {
+    public RestCaller(RestTemplate rt) {
         try {
             this.characters = new JSONArray(Files.readString(Path.of("characters.json")));
             this.queries = new JSONArray(Files.readString(Path.of("queries.json")));
             this.movies = new JSONArray(Files.readString(Path.of("movies.json")));
+            this.rt = rt;
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    //These constructors exist for testing purposes
+    public JSONArray getCharacters() {
+        return characters;
+    }
+
+    public JSONArray getMovies() {
+        return movies;
+    }
+
+    public JSONArray getQueries() {
+        return queries;
+    }
+
+    public RestTemplate getRt() {
+        return rt;
     }
 
     /**
@@ -39,7 +57,7 @@ public class RestCaller {
      * @param name, this is query given by the user.
      * @return a string of names of all characters the given character has appeared with.
      */
-    protected String getOtherCharacters(String name) {
+    public String getOtherCharacters(String name) {
         //Change query to all lower case.
         name = name.toLowerCase();
 
@@ -95,14 +113,13 @@ public class RestCaller {
      * @param request is the user created query.
      * @return the string form of the JSON returned by the API
      */
-    protected static String RequestNames(String request) {
-        //Create rest template and empty string for get request
-        RestTemplate rt = new RestTemplate();
+    public String RequestNames(String request) {
+        //Create empty string for get request
         String result = "";
 
         //Create try catch block in case of error
         try {
-            result = rt.getForObject("https://swapi.dev/api/people/?search=" + request, String.class);
+            result = this.rt.getForObject("https://swapi.dev/api/people/?search=" + request, String.class);
         } catch (Exception e) {
             return "Invalid request, server might be down";
         }
@@ -114,7 +131,7 @@ public class RestCaller {
      * @param person is the given person asked of by the user.
      * @return a JSON array of all other characters the given character shares a movie with.
      */
-    private JSONArray getAllActors(JSONObject person) {
+    protected JSONArray getAllActors(JSONObject person) {
         //Save this URL to be excluded from the list
         String thisURL = person.getString("url");
 
@@ -127,16 +144,13 @@ public class RestCaller {
         //This array contains all movies a character is in.
         JSONArray films =  (JSONArray) person.get("films");
 
-        //A RestTemplate that will be used if a call to the API needs to be made.
-        RestTemplate rt = new RestTemplate();
-
         //Loop through each movie to find each character
         for(Object film: films) {
             //Check if the current film has been found.
             JSONObject movie = getJSONObject(this.movies, (String) film, "url");
             if(movie == null) {
                 //If the film was not found, send an API call and save it.
-                String movieObject = rt.getForObject((String) film, String.class);
+                String movieObject = this.rt.getForObject((String) film, String.class);
                 this.movies.put(new JSONObject(movieObject));
 
                 //Add all character's url's to the array.
@@ -155,7 +169,7 @@ public class RestCaller {
                 JSONObject character = getJSONObject(this.characters, personURL, "url");
                 if (character == null) {
                     //If it was not send an API call and save the character data
-                    String personObject = rt.getForObject(personURL, String.class);
+                    String personObject = this.rt.getForObject(personURL, String.class);
                     people.put(new JSONObject(personObject));
                     this.characters.put(new JSONObject(personObject));
                 } else {
@@ -174,7 +188,7 @@ public class RestCaller {
      * @param field is the JSON field in which values need to be compared.
      * @return a JSON Object if a value is found, if it is not return null.
      */
-    private static JSONObject getJSONObject(JSONArray array,String compare, String field) {
+    public static JSONObject getJSONObject(JSONArray array,String compare, String field) {
         //Loop through a given array.
         for(Object object: array) {
             //If the value matches in the given field, return that JSON object.
@@ -211,7 +225,7 @@ public class RestCaller {
      * @param people is the array of people found using the API.
      * @return a list of people in the form of a string.
      */
-    protected static String readableNames(JSONArray people) {
+    private static String readableNames(JSONArray people) {
         ArrayList<String> names = new ArrayList<String>();
         for(Object person: people) {
             JSONObject character = (JSONObject) person;

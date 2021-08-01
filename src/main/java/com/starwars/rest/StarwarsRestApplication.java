@@ -1,5 +1,7 @@
 package com.starwars.rest;
 
+import org.springframework.web.client.RestTemplate;
+
 import java.util.Scanner;
 
 /**
@@ -11,7 +13,7 @@ public class StarwarsRestApplication {
 		//Create a scanner to read the command line
 		Scanner sc = new Scanner(System.in);
 		//Create a new RestCaller object so it reads in the found files
-		RestCaller rc = new RestCaller();
+		RestCaller rc = new RestCaller(new RestTemplate());
 
 		//Continuously ask for input until user wants to quit.
 		while(true) {

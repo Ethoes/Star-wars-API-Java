@@ -9,6 +9,9 @@ import static com.starwars.rest.MergeSort.mergeSort;
 
 public class MergeSortTest {
 
+    /**
+     * This test checks the sorting algorithm on a small array.
+     */
     @Test
     public void smallArrayTest() {
         try {
@@ -40,6 +43,9 @@ public class MergeSortTest {
         }
     }
 
+    /**
+     * This test tests on an empty array
+     */
     @Test
     public void emptyArrayTest() {
         JSONArray empty = new JSONArray();
@@ -49,6 +55,9 @@ public class MergeSortTest {
         assertTrue(empty.equals(new JSONArray()));
     }
 
+    /**
+     * This test checks if the algorithm throws a proper exception if the given JSONArray is not compatible.
+     */
     @Test
     public void noBirthField() {
         try {
